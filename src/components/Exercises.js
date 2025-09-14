@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Pagination from '@mui/material/Pagination';
 import { Box, Stack, Typography } from '@mui/material';
 
-import { exerciseOptions, fetchData } from '../utils/fetchData';
+import { exerciseOptions, fetchData, fetchBackednData } from '../utils/fetchData';
 import ExerciseCard from './ExerciseCard';
 import Loader from './Loader';
 
@@ -13,17 +13,21 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
   useEffect(() => {
     const fetchExercisesData = async () => {
       let exercisesData = [];
-      // let exercisesData_img = [];
+      
 
       if (bodyPart === 'all') {
-        exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
-        // exercisesData_img = await fetchData('https://exercisedb.p.rapidapi.com/image?resolution=320&exerciseId=0072' , exerciseOptions);
+        //exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
+        const exercisesData = await fetchBackednData('http://localhost:8088/api/exercises');
+        console.log('Loacl_Backend_data',exercisesData);
       } else {
         exercisesData = await fetchData(`https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}`, exerciseOptions);
-        // exercisesData_img = await fetchData('https://exercisedb.p.rapidapi.com/image?resolution=320&exerciseId=0072' , exerciseOptions);
+        console.log('YouTube_data',exercisesData);
       }
 
       setExercises(exercisesData);
+
+      //const names = exercisesData.map(bp => bp.name);
+      //setBodyParts(['all', ...names]);
     };
 
     fetchExercisesData();
