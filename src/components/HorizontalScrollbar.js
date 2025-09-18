@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu';
 import { Box, Typography } from '@mui/material';
 
@@ -27,19 +27,46 @@ const RightArrow = () => {
   );
 };
 
-const HorizontalScrollbar = ({ data, bodyParts, setBodyPart, bodyPart }) => (
-  <ScrollMenu LeftArrow={LeftArrow} RightArrow={RightArrow}>
-    {data.map((item) => (
-      <Box
-        key={item.id || item}
-        itemId={item.id || item}
-        title={item.id || item}
-        m="0 40px"
-      >
-        {bodyParts ? <BodyPart item={item} setBodyPart={setBodyPart} bodyPart={bodyPart} /> : <ExerciseCard exercise={item} /> }
+const HorizontalScrollbar = ({ data, bodyParts, setBodyPart, bodyPart }) => {
+  useEffect(() => {
+    console.group("🔍 HorizontalScrollbar Debug");
+    console.log("📦 Raw data received:", data);
+    console.log("📏 Type:", typeof data);
+    console.log("✅ Is Array?", Array.isArray(data));
+    if (Array.isArray(data)) {
+      console.log("🔢 Array length:", data.length);
+      console.log("📝 First item sample:", data[0]);
+    } else {
+      console.warn("⚠️ data is NOT an array. This may break .map()");
+    }
+    console.groupEnd();
+  }, [data]);
+
+  if (!Array.isArray(data)) {
+    console.error("❌ HorizontalScrollbar: data is not an array:", data);
+    return (
+      <Box sx={{ color: 'red', fontWeight: 'bold', textAlign: 'center', p: 2 }}>
+        ⚠️ Invalid data format — expected an array but got {typeof data}.
       </Box>
-    ))}
-  </ScrollMenu>
-);
+    );
+  }
+
+  return (
+    <ScrollMenu LeftArrow={LeftArrow} RightArrow={RightArrow}>
+      {data.map((item, idx) => (
+        <Box
+          key={item.id || item || idx}
+          itemId={item.id || item || idx}
+          title={item.id || item}
+          m="0 40px"
+        >
+          {bodyParts
+            ? <BodyPart item={item} setBodyPart={setBodyPart} bodyPart={bodyPart} />
+            : <ExerciseCard exercise={item} />}
+        </Box>
+      ))}
+    </ScrollMenu>
+  );
+};
 
 export default HorizontalScrollbar;

@@ -12,22 +12,23 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
 
   useEffect(() => {
     const fetchExercisesData = async () => {
+      console.log(`[Exercises] Fetching exercises for bodyPart: ${bodyPart}`);
       let exercisesData = [];
-      
 
-      if (bodyPart === 'all') {
-        //exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
-        const exercisesData = await fetchBackednData('http://localhost:8088/api/exercises');
-        console.log('Loacl_Backend_data',exercisesData);
-      } else {
-        exercisesData = await fetchData(`https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}`, exerciseOptions);
-        console.log('YouTube_data',exercisesData);
+      try {
+        if (bodyPart === 'all') {
+          console.log('[Exercises] Fetching ALL exercises from backend...');
+          exercisesData = await fetchBackednData('http://localhost:8088/api/exercises');
+        } else {
+          console.log(`[Exercises] Fetching exercises for bodyPart: ${bodyPart} from backend...`);
+          exercisesData = await fetchBackednData(`http://localhost:8088/api/exercises/bodyPart/${bodyPart}`);
+        }
+
+        console.log(`[Exercises] Data fetched successfully. Total records: ${exercisesData.length}`);
+        setExercises(exercisesData);
+      } catch (error) {
+        console.error('[Exercises] Failed to fetch exercises:', error);
       }
-
-      setExercises(exercisesData);
-
-      //const names = exercisesData.map(bp => bp.name);
-      //setBodyParts(['all', ...names]);
     };
 
     fetchExercisesData();
@@ -38,24 +39,34 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
   const indexOfFirstExercise = indexOfLastExercise - exercisesPerPage;
   const currentExercises = exercises.slice(indexOfFirstExercise, indexOfLastExercise);
 
-  const paginate = (event, value) => {
-    setCurrentPage(value);
+  console.log(`[Exercises] Pagination Info -> Current Page: ${currentPage}, Index Range: ${indexOfFirstExercise}-${indexOfLastExercise}, Current Page Exercises: ${currentExercises.length}`);
 
+  const paginate = (event, value) => {
+    console.log(`[Exercises] Page changed from ${currentPage} to ${value}`);
+    setCurrentPage(value);
     window.scrollTo({ top: 1800, behavior: 'smooth' });
   };
 
-  if (!currentExercises.length) return <Loader />;
+  if (!currentExercises.length) {
+    console.warn('[Exercises] No exercises to display. Showing Loader...');
+    return <Loader />;
+  }
 
   return (
     <Box id="exercises" sx={{ mt: { lg: '109px' } }} mt="50px" p="20px">
-      <Typography variant="h4" fontWeight="bold" sx={{ fontSize: { lg: '44px', xs: '30px' } }} mb="46px">Showing Results</Typography>
+      <Typography variant="h4" fontWeight="bold" sx={{ fontSize: { lg: '44px', xs: '30px' } }} mb="46px">
+        Showing Results
+      </Typography>
+
       <Stack direction="row" sx={{ gap: { lg: '107px', xs: '50px' } }} flexWrap="wrap" justifyContent="center">
-        {currentExercises.map((exercise, idx) => (
-          <ExerciseCard key={idx} exercise={exercise} />
-        ))}
+        {currentExercises.map((exercise, idx) => {
+          console.log(`[Exercises] Rendering Exercise Card #${idx + 1}:`, exercise);
+          return <ExerciseCard key={idx} exercise={exercise} />;
+        })}
       </Stack>
+
       <Stack sx={{ mt: { lg: '114px', xs: '70px' } }} alignItems="center">
-        {exercises.length > 9 && (
+        {exercises.length > exercisesPerPage && (
           <Pagination
             color="standard"
             shape="rounded"
@@ -72,4 +83,3 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
 };
 
 export default Exercises;
-
